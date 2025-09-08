@@ -1,6 +1,7 @@
 package ru.skypro.homework.service;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.skypro.homework.dto.Comment;
@@ -24,6 +25,7 @@ public class CommentService {
     private final AdRepository adRepository;
     private final CommentMapper commentMapper;
 
+    @PreAuthorize("@commentSecurity.isOwner(#adId, authentication) or hasRole('ADMIN')")
     public Comment addComment(long adId, long authorId, CreateOrUpdateComment req) {
         UserEntity author = userRepository.findById(authorId)
                 .orElseThrow(() -> new IllegalArgumentException("User not found: " + authorId));
@@ -42,7 +44,7 @@ public class CommentService {
                 .map(commentMapper::toDto)
                 .toList();
     }
-
+    @PreAuthorize("@adSecurity.isOwner(#commentId, authentication) or hasRole('ADMIN')")
     public void deleteComment(long commentId) {
         commentRepository.deleteById(commentId);
     }

@@ -1,6 +1,7 @@
 package ru.skypro.homework.service;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.skypro.homework.dto.Ad;
@@ -46,6 +47,7 @@ public class AdService {
                 .toList();
     }
 
+    @PreAuthorize("@commentSecurity.isOwner(#commentId, authentication) or hasRole('ADMIN')")
     public Ad updateAd(long adId, CreateOrUpdateAd req, String imagePath) {
         AdEntity entity = adRepository.findById(adId)
                 .orElseThrow(() -> new IllegalArgumentException("Ad not found: " + adId));
@@ -53,6 +55,7 @@ public class AdService {
         return adMapper.toDto(entity);
     }
 
+    @PreAuthorize("@adSecurity.isOwner(#adId, authentication) or hasRole('ADMIN')")
     public void deleteAd(long adId) {
         adRepository.deleteById(adId);
     }
